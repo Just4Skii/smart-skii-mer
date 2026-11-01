@@ -8,7 +8,7 @@ No account. No telemetry. No apps killed.
 
 [**Download for Windows**](https://github.com/Just4Skii/smart-skii-mer/releases/latest/download/SmartSkiimer-Setup-3.2.0.exe) · [Website](https://just4skii.github.io/smart-skii-mer/) · [Report an issue](https://github.com/Just4Skii/smart-skii-mer/issues)
 
-![Dashboard](website/assets/dashboard.png)
+![Dashboard](docs/assets/dashboard.png)
 
 ---
 
@@ -74,7 +74,7 @@ Or open `src/SmartMemReduct.csproj` in Visual Studio.
 
 ```
 src/            C# / WinForms (.NET 10)
-website/        static landing page (GitHub Pages)
+docs/           static landing page (GitHub Pages)
 installer/      Inno Setup script + README + enable-remote.cmd
 scripts/        build automation
 docs/           implementation notes
