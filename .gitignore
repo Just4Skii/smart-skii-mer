@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+publish/
+dist/
+*.user
+*.suo
+.vs/
+
+# Secrets and user state — never commit
+*.key
+settings.json
+*.secretbak
+crash.log
+app-runtime.log
+
+# OS noise
+Thumbs.db
+.DS_Store

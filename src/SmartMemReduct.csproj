@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <AssemblyName>Smart Skii-mer</AssemblyName>
+    <RootNamespace>SmartMemReduct</RootNamespace>
+    <Version>3.0.0</Version>
+    <Authors>Antigravity</Authors>
+    <Product>Smart Skii-mer — AI-Powered Memory Optimizer</Product>
+    <Description>Smart Skii-mer: High-performance anti-freeze memory optimizer with AI-powered analysis (BYOK), tiered auto-cleaning, standby list purging, selective background trimming, CPU anti-freeze governor, themeable UI, and global hotkeys.</Description>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Skii-mer — your PC, in perfect focus</title>
+<meta name="description" content="A local-first Windows memory assistant. Puts idle apps in Efficiency mode, protects the game you're playing, and advises only when you ask. Free, open source, no telemetry.">
+<meta name="theme-color" content="#06090c">
+<meta property="og:title" content="Smart Skii-mer — your PC, in perfect focus">
+<meta property="og:description" content="Local-first Windows memory assistant. Efficiency mode, game-aware focus, any AI provider, phone remote.">
+<meta property="og:image" content="assets/dashboard.png">
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06090c;--bg2:#080d12;--panel:#0b1218;--panel2:#0f181f;
+  --ink:#e9f2ec;--muted:#8297a1;--dim:#5c6f79;
+  --mint:#7ff0c0;--mint2:#3ddc97;--ice:#9ad9ff;--amber:#ffc76b;--rose:#ff8fa3;
+  --line:rgba(154,217,255,.12);--line2:rgba(154,217,255,.2);
+  --serif:"Instrument Serif",Georgia,serif;--sans:"Manrope",system-ui,sans-serif;--mono:"JetBrains Mono",monospace;
+  --r:18px;--max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:400;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1000;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
+::selection{background:rgba(127,240,192,.25);color:#fff}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--mint)}
+.eyebrow::before{content:"";width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--mint))}
+h1,h2,h3{font-weight:400;margin:0;letter-spacing:-.02em}
+.serif{font-family:var(--serif)}
+.muted{color:var(--muted)}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:.35s}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:76px;transition:.35s}
+.nav.scrolled{background:rgba(6,9,12,.82);backdrop-filter:blur(18px) saturate(150%);border-bottom:1px solid var(--line)}
+.nav.scrolled .nav-in{height:62px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:600;letter-spacing:-.01em}
+.mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#0a1218;border:1px solid var(--line2);box-shadow:0 0 0 1px rgba(127,240,192,.08) inset}
+.mark svg{width:20px;height:20px}
+.nav-links{display:flex;gap:28px;font-size:13.5px;color:var(--muted)}
+.nav-links a{transition:.2s;position:relative}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--mint);transition:.25s}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{width:100%}
+.nav-cta{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:9px;border-radius:12px;padding:11px 17px;font-size:13.5px;font-weight:600;border:1px solid var(--line2);transition:transform .2s,background .2s,border-color .2s;cursor:pointer;background:transparent;color:var(--ink);font-family:inherit}
+.btn:hover{transform:translateY(-1px);border-color:rgba(127,240,192,.5)}
+.btn-primary{background:linear-gradient(135deg,var(--mint),var(--mint2));color:#04241a;border:none;box-shadow:0 8px 30px rgba(61,220,151,.25)}
+.btn-primary:hover{box-shadow:0 12px 40px rgba(61,220,151,.38);transform:translateY(-2px)}
+.btn-ghost{background:rgba(255,255,255,.02)}
+@media(max-width:900px){.nav-links{display:none}}
+
+/* hero */
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;padding:130px 0 70px;overflow:hidden}
+.aurora{position:absolute;inset:-20%;z-index:0;filter:blur(70px);opacity:.55;pointer-events:none}
+.aurora span{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite alternate}
+.aurora span:nth-child(1){width:52vw;height:52vw;left:-8vw;top:-10vw;background:radial-gradient(circle,rgba(61,220,151,.34),transparent 62%)}
+.aurora span:nth-child(2){width:46vw;height:46vw;right:-6vw;top:2vw;background:radial-gradient(circle,rgba(154,217,255,.22),transparent 64%);animation-delay:-7s}
+.aurora span:nth-child(3){width:36vw;height:36vw;left:28vw;bottom:-14vw;background:radial-gradient(circle,rgba(255,199,107,.12),transparent 65%);animation-delay:-13s}
+@keyframes drift{to{transform:translate3d(4vw,-3vw,0) scale(1.12)}}
+.grid-bg{position:absolute;inset:0;z-index:0;background-image:linear-gradient(rgba(154,217,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(154,217,255,.055) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 78%)}
+.hero .wrap{position:relative;z-index:2;display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}
+@media(max-width:980px){.hero .wrap{grid-template-columns:1fr;gap:44px}}
+.hero h1{font-size:clamp(48px,6.4vw,84px);line-height:.94;letter-spacing:-.035em;margin:18px 0 22px}
+.hero h1 em{font-family:var(--serif);font-style:italic;color:var(--mint);letter-spacing:-.01em}
+.hero p.lead{font-size:16.5px;color:var(--muted);max-width:520px;margin:0 0 30px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:26px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.trust span{display:flex;align-items:center;gap:7px}
+.trust i{width:5px;height:5px;border-radius:50%;background:var(--mint);display:inline-block;box-shadow:0 0 10px var(--mint)}
+.scroll-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-hint::after{content:"";width:1px;height:36px;background:linear-gradient(var(--mint),transparent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.25;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+/* instrument card */
+.instrument{position:relative;perspective:1200px}
+.inst-card{position:relative;border-radius:24px;background:linear-gradient(160deg,rgba(15,24,31,.96),rgba(8,13,18,.96));border:1px solid var(--line2);box-shadow:0 40px 100px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.02) inset;padding:22px;transform-style:preserve-3d;transition:transform .18s ease;will-change:transform}
+.inst-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.inst-title{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px var(--mint);animation:blink 2.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.inst-meta{font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.1em}
+.gauge-row{display:grid;grid-template-columns:170px 1fr;gap:18px;align-items:center;margin-bottom:18px}
+@media(max-width:420px){.gauge-row{grid-template-columns:140px 1fr}}
+.gauge{position:relative;width:170px;height:170px}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .val{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge .val b{display:block;font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.gauge .val span{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.metrics{display:flex;flex-direction:column;gap:12px}
+.metric{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(154,217,255,.08);padding-bottom:9px}
+.metric span{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.metric b{font-size:15px;font-weight:600}
+.metric b small{font-size:10px;color:var(--muted);font-weight:400}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;padding:6px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.015);transition:.2s;cursor:pointer;user-select:none}
+.chip:hover{color:var(--ink);border-color:var(--line2)}
+.chip.on{background:rgba(127,240,192,.1);border-color:rgba(127,240,192,.45);color:var(--mint)}
+.proc-list{display:flex;flex-direction:column;gap:7px}
+.proc{display:grid;grid-template-columns:1fr 60px 52px;gap:10px;align-items:center;font-size:11px;color:var(--muted);padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.015)}
+.proc b{color:var(--ink);font-weight:500;font-size:11.5px}
+.proc .bar{height:3px;border-radius:3px;background:rgba(154,217,255,.1);overflow:hidden}
+.proc .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--mint),var(--ice));transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.proc .st{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;text-align:right;color:var(--dim)}
+.proc .st.eco{color:var(--mint)}
+.inst-foot{display:flex;justify-content:space-between;margin-top:15px;padding-top:13px;border-top:1px solid rgba(154,217,255,.08);font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em}
+.float-badge{position:absolute;right:-14px;bottom:38px;background:rgba(9,15,20,.9);border:1px solid rgba(127,240,192,.3);border-radius:12px;padding:9px 13px;font-family:var(--mono);font-size:9.5px;color:var(--mint);backdrop-filter:blur(10px);animation:float 6s ease-in-out infinite;box-shadow:0 18px 40px rgba(0,0,0,.4)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+
+/* ticker */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;background:rgba(11,18,24,.6);padding:13px 0}
+.ticker-track{display:flex;gap:46px;width:max-content;animation:scroll 34s linear infinite;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.ticker-track b{color:var(--mint);font-weight:400}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* sections */
+section{position:relative;padding:110px 0}
+.section-head{max-width:640px;margin-bottom:54px}
+.section-head h2{font-size:clamp(34px,4.4vw,54px);line-height:1.02;letter-spacing:-.035em;margin:14px 0 16px}
+.section-head h2 em{font-family:var(--serif);font-style:italic;color:var(--mint)}
+.section-head p{color:var(--muted);font-size:15.5px;max-width:540px}
+.rule{height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
+
+/* manifesto */
+.manifesto{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:start}
+@media(max-width:900px){.manifesto{grid-template-columns:1fr;gap:34px}}
+.pull{font-family:var(--serif);font-size:clamp(30px,3.6vw,46px);line-height:1.12;letter-spacing:-.02em}
+.pull em{color:var(--mint);font-style:italic}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stat{background:var(--bg2);padding:22px 20px}
+.stat b{display:block;font-size:28px;font-weight:600;letter-spacing:-.03em}
+.stat span{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+
+/* modes */
+.modes{display:grid;grid-template-columns:.82fr 1.18fr;gap:28px}
+@media(max-width:900px){.modes{grid-template-columns:1fr}}
+.mode-list{display:flex;flex-direction:column;gap:8px}
+.mode{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:12px;border:1px solid transparent;cursor:pointer;transition:.25s;background:transparent;text-align:left;color:inherit;font-family:inherit}
+.mode:hover{background:rgba(255,255,255,.02)}
+.mode.on{background:linear-gradient(90deg,rgba(127,240,192,.09),transparent);border-color:rgba(127,240,192,.28)}
+.mode .n{font-family:var(--mono);font-size:9.5px;color:var(--dim)}
+.mode h4{margin:0;font-size:15px;font-weight:600}
+.mode p{margin:2px 0 0;font-size:11.5px;color:var(--dim)}
+.mode .ind{margin-left:auto;width:7px;height:7px;border-radius:50%;background:rgba(154,217,255,.2);transition:.25s}
+.mode.on .ind{background:var(--mint);box-shadow:0 0 14px var(--mint)}
+.mode-panel{position:relative;border:1px solid var(--line2);border-radius:20px;background:linear-gradient(160deg,rgba(15,24,31,.9),rgba(8,13,18,.95));padding:26px;min-height:420px;overflow:hidden}
+.mode-panel::before{content:"";position:absolute;inset:-40% -10% auto;height:70%;background:radial-gradient(ellipse at 50% 0,rgba(127,240,192,.14),transparent 65%);opacity:0;transition:.5s}
+.mode-panel.live::before{opacity:1}
+.mp-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
+.mp-top h3{font-size:26px;letter-spacing:-.02em}
+.mp-top .mono{color:var(--dim)}
+.mp-ram{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.mp-ram b{font-size:62px;font-weight:600;letter-spacing:-.05em;line-height:1}
+.mp-ram span{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em}
+.mp-bar{height:6px;border-radius:6px;background:rgba(154,217,255,.09);overflow:hidden;margin-bottom:26px}
+.mp-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--mint),var(--ice));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.mp-rows{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+@media(max-width:520px){.mp-rows{grid-template-columns:1fr}}
+.mp-row{border:1px solid var(--line);border-radius:10px;padding:12px 13px;background:rgba(255,255,255,.012)}
+.mp-row span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.mp-row b{font-size:13px;font-weight:600}
+.mp-note{font-size:12px;color:var(--muted);border-left:2px solid rgba(127,240,192,.35);padding-left:12px}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:960px){.bento{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.bento{grid-template-columns:1fr}}
+.card{position:relative;border:1px solid var(--line);border-radius:var(--r);background:linear-gradient(165deg,rgba(15,24,31,.75),rgba(8,13,18,.9));padding:24px;overflow:hidden;transition:transform .3s,border-color .3s}
+.card::before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(127,240,192,.12),transparent 60%);left:var(--mx,50%);top:var(--my,50%);transform:translate(-50%,-50%);opacity:0;transition:.3s;pointer-events:none}
+.card:hover{border-color:rgba(154,217,255,.28)}
+.card:hover::before{opacity:1}
+.card.wide{grid-column:span 2}
+@media(max-width:620px){.card.wide{grid-column:span 1}}
+.card .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(127,240,192,.08);border:1px solid rgba(127,240,192,.18);margin-bottom:16px}
+.card .ico svg{width:18px;height:18px;stroke:var(--mint);fill:none;stroke-width:1.5}
+.card h3{font-size:17px;margin-bottom:7px;letter-spacing:-.01em}
+.card p{font-size:13px;color:var(--muted);margin:0}
+.card .tag{position:absolute;top:18px;right:18px;font-family:var(--mono);font-size:8.5px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+
+/* ai */
+.ai-wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+@media(max-width:900px){.ai-wrap{grid-template-columns:1fr}}
+.providers{display:flex;gap:7px;flex-wrap:wrap;margin:22px 0}
+.prov{font-family:var(--mono);font-size:9.5px;padding:7px 11px;border-radius:8px;border:1px solid var(--line);color:var(--muted);letter-spacing:.04em}
+.prov.hot{border-color:rgba(127,240,192,.35);color:var(--mint);background:rgba(127,240,192,.06)}
+.advice{border:1px solid var(--line2);border-radius:16px;padding:18px;background:linear-gradient(160deg,rgba(15,24,31,.95),rgba(8,13,18,.98));box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.advice-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.advice .sum{font-size:13.5px;color:var(--ink);margin-bottom:14px;line-height:1.5}
+.advice-item{border-top:1px solid rgba(154,217,255,.08);padding:12px 0 0;margin-top:12px}
+.advice-item b{display:block;font-size:13px;margin-bottom:3px}
+.advice-item p{font-size:11.5px;color:var(--muted);margin:0}
+.advice-item .risk{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-top:6px;display:inline-block}
+.type-cursor::after{content:"▍";color:var(--mint);animation:caret 1s steps(2) infinite}
+@keyframes caret{50%{opacity:0}}
+
+/* inside */
+.shots{display:grid;grid-template-columns:1.4fr .9fr;gap:16px}
+@media(max-width:860px){.shots{grid-template-columns:1fr}}
+.shot{position:relative;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#080d12}
+.shot img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.shot:hover img{transform:scale(1.03)}
+.shot figcaption{position:absolute;left:0;right:0;bottom:0;padding:16px;background:linear-gradient(transparent,rgba(6,9,12,.92));font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* install */
+.install{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+@media(max-width:900px){.install{grid-template-columns:1fr}}
+.steps{position:relative}
+.step{display:grid;grid-template-columns:42px 1fr;gap:16px;padding-bottom:30px;position:relative}
+.step:last-child{padding-bottom:0}
+.step::before{content:"";position:absolute;left:20px;top:44px;bottom:0;width:1px;background:linear-gradient(rgba(127,240,192,.3),rgba(127,240,192,.05))}
+.step:last-child::before{display:none}
+.step .num{width:42px;height:42px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--mono);font-size:12px;color:var(--mint);background:var(--bg)}
+.step h4{margin:3px 0 5px;font-size:15px}
+.step p{margin:0;font-size:13px;color:var(--muted)}
+.download-card{border:1px solid rgba(127,240,192,.25);border-radius:20px;padding:26px;background:linear-gradient(165deg,rgba(15,30,24,.7),rgba(8,13,18,.95));position:relative;overflow:hidden}
+.download-card::after{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(127,240,192,.18),transparent 65%)}
+.download-card h3{font-size:22px;margin-bottom:6px}
+.download-card .meta{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.08em;margin:14px 0 20px}
+.hash{display:flex;align-items:center;gap:8px;margin-top:14px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:rgba(0,0,0,.25)}
+.hash code{font-family:var(--mono);font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hash button{all:unset;cursor:pointer;font-family:var(--mono);font-size:8.5px;color:var(--mint);letter-spacing:.1em;text-transform:uppercase;margin-left:auto}
+.note{font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6}
+.note b{color:var(--amber);font-weight:600}
+
+/* privacy */
+.privacy-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.privacy-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.privacy-grid{grid-template-columns:1fr}}
+.pv{border:1px solid var(--line);border-radius:14px;padding:20px;background:rgba(255,255,255,.012)}
+.pv b{display:block;font-size:13px;margin-bottom:6px}
+.pv span{font-size:11.5px;color:var(--muted)}
+
+/* faq */
+.faq{max-width:800px}
+.q{border-top:1px solid var(--line);padding:20px 0;cursor:pointer}
+.q:last-child{border-bottom:1px solid var(--line)}
+.q h4{display:flex;justify-content:space-between;gap:20px;margin:0;font-size:15px;font-weight:500;letter-spacing:-.01em}
+.q h4 i{font-style:normal;color:var(--mint);transition:.3s}
+.q.open h4 i{transform:rotate(45deg)}
+.q p{max-height:0;overflow:hidden;transition:max-height .4s ease,opacity .3s;opacity:0;margin:0;color:var(--muted);font-size:13px}
+.q.open p{max-height:220px;opacity:1;margin-top:12px}
+
+/* cta */
+.cta{text-align:center;padding:120px 0;position:relative;overflow:hidden}
+.cta::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(61,220,151,.14),transparent 60%)}
+.cta h2{position:relative;font-size:clamp(40px,6vw,76px);line-height:.98;letter-spacing:-.04em;margin-bottom:18px}
+.cta h2 em{font-family:var(--serif);font-style:italic;color:var(--mint)}
+.cta p{position:relative;color:var(--muted);max-width:460px;margin:0 auto 30px}
+.cta .hero-actions{justify-content:center;position:relative}
+
+footer{border-top:1px solid var(--line);padding:34px 0;color:var(--dim);font-size:12px}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+.foot-links{display:flex;gap:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top">
+      <span class="mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5c2.6 0 4.7 2.2 4.7 4.9S14.6 13.3 12 13.3 7.3 11.1 7.3 8.4 9.4 3.5 12 3.5Z" stroke="#7ff0c0" stroke-width="1.4"/><path d="M12 13.3v6.2" stroke="#7ff0c0" stroke-width="1.4"/><path d="M4.5 19.5a8.5 8.5 0 0 1 2-8" stroke="#3ddc97" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      Smart Skii-mer
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#modes">Modes</a>
+      <a href="#assistant">Assistant</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" href="https://github.com/Just4Skii/smart-skii-mer" target="_blank" rel="noopener">Source</a>
+      <a class="btn btn-primary" href="https://github.com/Just4Skii/smart-skii-mer/releases/latest/download/SmartSkiimer-Setup-3.2.0.exe">Download</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="aurora"><span></span><span></span><span></span></div>
+  <div class="grid-bg"></div>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow reveal">Windows 10 / 11 · local-first</div>
+      <h1 class="reveal d1">Your PC,<br><em>in perfect focus.</em></h1>
+      <p class="lead reveal d2">Smart Skii-mer watches memory, puts idle apps into Windows Efficiency mode, and steps aside while you play. It never closes your apps. It never phones home.</p>
+      <div class="hero-actions reveal d3">
+        <a class="btn btn-primary" href="https://github.com/Just4Skii/smart-skii-mer/releases/latest/download/SmartSkiimer-Setup-3.2.0.exe">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+          Download for Windows
+        </a>
+        <a class="btn btn-ghost" href="#how">See how it behaves</a>
+      </div>
+      <div class="trust reveal d3">
+        <span><i></i>33 MB installer</span>
+        <span><i></i>No account</span>
+        <span><i></i>No telemetry</span>
+        <span><i></i>MIT licensed</span>
+      </div>
+    </div>
+
+    <div class="instrument reveal d2">
+      <div class="inst-card" id="instCard">
+        <div class="inst-head">
+          <div class="inst-title"><span class="dot"></span> Smart Skii-mer</div>
+          <div class="inst-meta">LIVE · 2.6s</div>
+        </div>
+        <div class="gauge-row">
+          <div class="gauge">
+            <svg width="170" height="170" viewBox="0 0 170 170">
+              <circle cx="85" cy="85" r="70" stroke="rgba(154,217,255,.09)" stroke-width="11" fill="none"/>
+              <circle id="ring" cx="85" cy="85" r="70" stroke="url(#g)" stroke-width="11" fill="none" stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="185" style="transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)"/>
+              <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ff0c0"/><stop offset="1" stop-color="#9ad9ff"/></linearGradient></defs>
+            </svg>
+            <div class="val"><div><b id="ramVal">58%</b><span>RAM in use</span></div></div>
+          </div>
+          <div class="metrics">
+            <div class="metric"><span>Processor</span><b id="cpuVal">11%<small> · 12 threads</small></b></div>
+            <div class="metric"><span>Displayed</span><b id="modeVal">Balanced</b></div>
+            <div class="metric"><span>Cleaned</span><b id="freedVal">0 MB</b></div>
+          </div>
+        </div>
+        <div class="chips" id="heroChips">
+          <button class="chip" data-mode="auto">Auto</button>
+          <button class="chip" data-mode="gaming">Gaming</button>
+          <button class="chip" data-mode="streaming">Streaming</button>
+          <button class="chip" data-mode="work">Work</button>
+          <button class="chip" data-mode="eco">Eco</button>
+          <button class="chip on" data-mode="balanced">Balanced</button>
+        </div>
+        <div class="proc-list">
+          <div class="proc"><b>Your game</b><div class="bar"><i style="width:64%"></i></div><span class="st">focused</span></div>
+          <div class="proc"><b>Browser</b><div class="bar"><i style="width:38%"></i></div><span class="st eco">eco</span></div>
+          <div class="proc"><b>Launcher</b><div class="bar"><i style="width:21%"></i></div><span class="st eco">eco</span></div>
+          <div class="proc"><b>Music</b><div class="bar"><i style="width:12%"></i></div><span class="st eco">eco</span></div>
+        </div>
+        <div class="inst-foot"><span>PROTECTED · foreground untouched</span><span id="clock">--:--:--</span></div>
+      </div>
+      <div class="float-badge">◆ no app ever killed</div>
+    </div>
+  </div>
+  <div class="scroll-hint">scroll</div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Windows Efficiency mode</span><b>·</b><span>EcoQoS</span><b>·</b><span>never kills apps</span><b>·</b><span>works offline</span><b>·</b><span>any AI provider</span><b>·</b><span>phone remote on Wi-Fi</span><b>·</b><span>MIT licensed</span><b>·</b>
+    <span>Windows Efficiency mode</span><b>·</b><span>EcoQoS</span><b>·</b><span>never kills apps</span><b>·</b><span>works offline</span><b>·</b><span>any AI provider</span><b>·</b><span>phone remote on Wi-Fi</span><b>·</b><span>MIT licensed</span><b>·</b>
+  </div>
+</div>
+
+<section id="how">
+  <div class="wrap manifesto">
+    <div>
+      <div class="eyebrow reveal">The philosophy</div>
+      <p class="pull reveal d1">Most “boosters” kill processes and hope. <em>This one asks Windows to slow idle apps down</em> — and leaves the app you're actually using alone.</p>
+      <p class="reveal d2 muted" style="max-width:480px;margin-top:24px">EcoQoS is the same mechanism Task Manager exposes as Efficiency mode. Smart Skii-mer applies it to background apps, trims their working sets only when they're idle, and reverses everything when you quit.</p>
+    </div>
+    <div class="stat-grid reveal d2">
+      <div class="stat"><b>&lt; 1%</b><span>idle CPU</span></div>
+      <div class="stat"><b>~60 MB</b><span>app footprint</span></div>
+      <div class="stat"><b>0</b><span>apps killed</span></div>
+      <div class="stat"><b>100%</b><span>local by default</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="modes" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Modes</div>
+      <h2>It changes posture,<br><em>not your apps.</em></h2>
+      <p>Auto reads the foreground window and picks a mode. You can pin one whenever you want.</p>
+    </div>
+    <div class="modes">
+      <div class="mode-list reveal" id="modeList">
+        <button class="mode" data-mode="auto"><span class="n">01</span><div><h4>Auto</h4><p>Reads the app you're using and decides.</p></div><span class="ind"></span></button>
+        <button class="mode" data-mode="gaming"><span class="n">02</span><div><h4>Gaming</h4><p>Game gets GPU preference and priority; the rest goes quiet.</p></div><span class="ind"></span></button>
+        <button class="mode" data-mode="streaming"><span class="n">03</span><div><h4>Streaming</h4><p>Protects the encoder and the game together.</p></div><span class="ind"></span></button>
+        <button class="mode" data-mode="work"><span class="n">04</span><div><h4>Work</h4><p>Keeps browser and office apps responsive.</p></div><span class="ind"></span></button>
+        <button class="mode" data-mode="eco"><span class="n">05</span><div><h4>Eco</h4><p>Battery first. Almost everything idle is throttled.</p></div><span class="ind"></span></button>
+        <button class="mode on" data-mode="balanced"><span class="n">06</span><div><h4>Balanced</h4><p>Everyday cleanup without touching your work.</p></div><span class="ind"></span></button>
+      </div>
+      <div class="mode-panel live reveal d1" id="modePanel">
+        <div class="mp-top"><h3 id="mpTitle">Balanced</h3><span class="mono" id="mpTag">everyday</span></div>
+        <div class="mp-ram"><b id="mpRam">58%</b><span>estimated memory pressure</span></div>
+        <div class="mp-bar"><i id="mpBar" style="width:58%"></i></div>
+        <div class="mp-rows">
+          <div class="mp-row"><span>Background apps</span><b id="mpThrottle">4 throttled</b></div>
+          <div class="mp-row"><span>Cleaning</span><b id="mpClean">armed at 75%</b></div>
+          <div class="mp-row"><span>Foreground</span><b id="mpFg">protected</b></div>
+          <div class="mp-row"><span>Vendor hint</span><b id="mpVendor">Balanced profile</b></div>
+        </div>
+        <p class="mp-note" id="mpNote">Cleanup runs only when memory gets tight. Nothing is closed, ever.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Inside</div>
+      <h2>Small app.<br><em>Serious restraint.</em></h2>
+    </div>
+    <div class="bento">
+      <article class="card wide reveal">
+        <span class="tag">Core</span>
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 18V9m5 9V5m5 13v-7m5 7V8"/></svg></div>
+        <h3>Efficiency mode, not termination</h3>
+        <p>Idle background apps get EcoQoS and idle priority through the Windows API. The app in front of you, games, anti-cheat and system processes are never touched. Everything is reverted on exit.</p>
+      </article>
+      <article class="card reveal d1">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l7 4v6c0 4-3 6.5-7 8-4-1.5-7-4-7-8V7l7-4Z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Game-aware focus</h3>
+        <p>Detects fullscreen games, gives the executable a high GPU preference and AboveNormal priority, protects anti-cheat and overlays.</p>
+      </article>
+      <article class="card reveal d2">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v4m0 10v4M3 12h4m10 0h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg></div>
+        <h3>Any AI, or none</h3>
+        <p>OpenRouter, DeepSeek, OpenAI, Groq, Gemini, NVIDIA, or a local model. Keys stay encrypted on the PC. No key? A built-in checker still advises.</p>
+      </article>
+      <article class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+        <h3>Phone remote</h3>
+        <p>Same Wi-Fi. Pair with a 4-digit code, then trigger a clean or switch modes mid-game without alt-tabbing.</p>
+      </article>
+      <article class="card reveal d1">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></div>
+        <h3>Your hotkey</h3>
+        <p>Record any combination for deep clean. Defaults to Ctrl + Alt + D and never conflicts with your game binds unless you choose.</p>
+      </article>
+      <article class="card reveal d2">
+        <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg></div>
+        <h3>Zero telemetry</h3>
+        <p>No account, no analytics, no background uploads. The only outbound call happens when you press Analyse — and you can see exactly what it sends.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="assistant">
+  <div class="wrap ai-wrap">
+    <div>
+      <div class="eyebrow reveal">Assistant</div>
+      <h2 class="reveal d1" style="font-size:clamp(34px,4.4vw,54px);line-height:1.02;letter-spacing:-.035em;margin:14px 0 16px">A second opinion,<br><em class="serif" style="color:var(--mint)">only when asked.</em></h2>
+      <p class="reveal d2 muted" style="max-width:480px">It sends a compact snapshot — CPU model, laptop or desktop, GPU, power plan, foreground app and four largest processes — then asks for structured advice. Results are cached for ten minutes so a repeated check costs nothing.</p>
+      <div class="providers reveal d2">
+        <span class="prov hot">DeepSeek</span><span class="prov hot">OpenRouter</span><span class="prov">OpenAI</span><span class="prov">Gemini</span><span class="prov">Groq</span><span class="prov">NVIDIA</span><span class="prov">Local</span><span class="prov">Custom</span>
+      </div>
+      <p class="reveal d3 note">A typical analysis is about <b style="color:var(--mint)">320 tokens</b> — a fraction of a cent. Regulation itself never calls the model.</p>
+    </div>
+    <div class="advice reveal d2">
+      <div class="advice-head"><span>Assistant · NVIDIA NIM</span><span style="color:var(--mint)">● live</span></div>
+      <p class="sum" id="typeSum"></p>
+      <div class="advice-item">
+        <b>Use the ASUS performance profile</b>
+        <p>Armoury Crate is installed. Balanced suits desktop work; switch to Turbo for gaming and Optimized GPU mode.</p>
+        <span class="risk">low risk · open vendor app</span>
+      </div>
+      <div class="advice-item">
+        <b>Trim background apps</b>
+        <p>Brave and Steam are using 1.7 GB while idle. A background trim frees memory without touching the game.</p>
+        <span class="risk">low risk · trim background</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inside" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">The app</div>
+      <h2>Built like an instrument,<br><em>not a control panel.</em></h2>
+    </div>
+    <div class="shots">
+      <figure class="shot reveal"><img src="assets/dashboard.png" alt="Smart Skii-mer dashboard with modes and memory gauge" loading="lazy"><figcaption>Overview · modes · live memory</figcaption></figure>
+      <figure class="shot reveal d1"><img src="assets/assistant.png" alt="Assistant giving device-specific recommendations" loading="lazy"><figcaption>Assistant · device-aware advice</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap install">
+    <div>
+      <div class="eyebrow reveal">Install</div>
+      <h2 class="reveal d1" style="font-size:clamp(34px,4.4vw,54px);line-height:1.02;letter-spacing:-.035em;margin:14px 0 16px">Three steps.<br><em class="serif" style="color:var(--mint)">No admin.</em></h2>
+      <div class="steps reveal d2" style="margin-top:34px">
+        <div class="step"><div class="num">1</div><div><h4>Download the installer</h4><p>Signed? Not yet — so Windows may show “Windows protected your PC”. Choose <b style="color:var(--ink)">More info → Run anyway</b>.</p></div></div>
+        <div class="step"><div class="num">2</div><div><h4>Run the wizard</h4><p>Per-user install, no administrator prompt. Pick desktop shortcut and start with Windows if you want them.</p></div></div>
+        <div class="step"><div class="num">3</div><div><h4>Use it</h4><p>Everything works offline. AI is optional — paste any provider key, or keep the built-in checker.</p></div></div>
+      </div>
+    </div>
+    <div class="download-card reveal d1">
+      <div class="mono" style="color:var(--mint)">Latest release</div>
+      <h3>Smart Skii-mer 3.2.0</h3>
+      <p class="muted" style="font-size:13px;margin:0">Windows 10 / 11 · x64 · single installer</p>
+      <div class="meta"><span>33.8 MB</span><span>v3.2.0</span><span>MIT</span></div>
+      <a class="btn btn-primary" style="width:100%;justify-content:center" href="https://github.com/Just4Skii/smart-skii-mer/releases/latest/download/SmartSkiimer-Setup-3.2.0.exe">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+        Download installer
+      </a>
+      <div class="hash"><code id="hash">064E623145A4027FB31E8184269416C15E3681312576763F55FF6A0C53550803</code><button id="copyHash">copy</button></div>
+      <p class="note"><b>Note:</b> this build is not code-signed. SmartScreen will warn once per download. The hash above lets you verify the exact file; the full source is on GitHub.</p>
+      <a href="https://github.com/Just4Skii/smart-skii-mer" target="_blank" rel="noopener" style="display:inline-block;margin-top:10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Browse the source →</a>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Privacy</div>
+      <h2>Nothing leaves<br><em>unless you ask.</em></h2>
+    </div>
+    <div class="privacy-grid">
+      <div class="pv reveal"><b>No account</b><span>No sign-up, no email, no device fingerprint.</span></div>
+      <div class="pv reveal d1"><b>Keys stay local</b><span>Encrypted with Windows DPAPI for your user only.</span></div>
+      <div class="pv reveal d2"><b>Phone stays on Wi-Fi</b><span>The remote server refuses public addresses and requires pairing.</span></div>
+      <div class="pv reveal d3"><b>No hidden calls</b><span>AI runs only on Analyse and shows the exact snapshot.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal"><div class="eyebrow">FAQ</div><h2>Fair questions.</h2></div>
+    <div class="faq reveal">
+      <div class="q"><h4>Does it kill my apps? <i>+</i></h4><p>No. It asks Windows to lower the scheduling priority of idle background apps and trims their working sets. Foreground apps, games, anti-cheat and system processes are excluded, and changes are reverted when the app exits.</p></div>
+      <div class="q"><h4>Will it get me banned in a game? <i>+</i></h4><p>It only uses documented Windows APIs (EcoQoS, priority classes, per-app GPU preference). It does not inject, hook or modify game files. Anti-cheat processes are explicitly protected from throttling.</p></div>
+      <div class="q"><h4>Is AI required? <i>+</i></h4><p>No. Cleaning, modes and device detection are entirely local. AI is optional and only runs when you press Analyse, or when memory is critical during gaming if you enable that.</p></div>
+      <div class="q"><h4>Why does Windows warn me? <i>+</i></h4><p>The installer is not code-signed yet. SmartScreen flags unsigned executables. Verify the SHA-256 above or build it yourself from source.</p></div>
+      <div class="q"><h4>Does the phone remote work away from home? <i>+</i></h4><p>No — by design. It binds to private network addresses only, so it works on the same Wi-Fi and nowhere else.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2 class="reveal">Let the background<br><em>go quiet.</em></h2>
+    <p class="reveal d1">Free, open source, and reversible by design.</p>
+    <div class="hero-actions reveal d2">
+      <a class="btn btn-primary" href="https://github.com/Just4Skii/smart-skii-mer/releases/latest/download/SmartSkiimer-Setup-3.2.0.exe">Download for Windows</a>
+      <a class="btn btn-ghost" href="https://github.com/Just4Skii/smart-skii-mer" target="_blank" rel="noopener">View source</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>© 2026 Smart Skii-mer · MIT licensed</div>
+    <div class="foot-links">
+      <a href="https://github.com/Just4Skii/smart-skii-mer" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Just4Skii/smart-skii-mer/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/Just4Skii/smart-skii-mer/blob/main/LICENSE">License</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s,r=document)=>r.querySelector(s);
+  const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+  // nav
+  const nav = $('#nav');
+  addEventListener('scroll', ()=>nav.classList.toggle('scrolled', scrollY>24), {passive:true});
+
+  // reveal
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  },{threshold:.16});
+  $$('.reveal').forEach(el=>io.observe(el));
+
+  // clock
+  const clock = $('#clock');
+  const tick = ()=>{ const d=new Date(); clock.textContent=d.toTimeString().slice(0,8); };
+  tick(); setInterval(tick,1000);
+
+  // gauge + chips
+  const ring = $('#ring'), ramVal=$('#ramVal'), cpuVal=$('#cpuVal'), modeVal=$('#modeVal'), freedVal=$('#freedVal');
+  const modes = {
+    auto:{ram:58,cpu:11,mode:'Auto',freed:0},
+    gaming:{ram:64,cpu:22,mode:'Gaming',freed:412},
+    streaming:{ram:61,cpu:28,mode:'Streaming',freed:356},
+    work:{ram:52,cpu:9,mode:'Work',freed:120},
+    eco:{ram:44,cpu:6,mode:'Eco',freed:638},
+    balanced:{ram:58,cpu:11,mode:'Balanced',freed:210}
+  };
+  function paint(m){
+    const d = modes[m]; if(!d) return;
+    ramVal.textContent = d.ram+'%';
+    ring.style.strokeDashoffset = String(440 - 440*(d.ram/100));
+    cpuVal.innerHTML = d.cpu+'%<small> · 12 threads</small>';
+    modeVal.textContent = d.mode;
+    freedVal.textContent = d.freed ? d.freed+' MB' : '—';
+    $$('#heroChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.mode===m));
+  }
+  $$('#heroChips .chip').forEach(c=>c.addEventListener('click',()=>paint(c.dataset.mode)));
+  paint('balanced');
+
+  // instrument tilt
+  const card = $('#instCard'), inst = card.parentElement;
+  if(!reduce && matchMedia('(pointer:fine)').matches){
+    inst.addEventListener('mousemove', e=>{
+      const r=card.getBoundingClientRect();
+      const px=(e.clientX-r.left)/r.width-.5, py=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`rotateY(${px*7}deg) rotateX(${-py*7}deg) translateZ(0)`;
+    });
+    inst.addEventListener('mouseleave', ()=>{ card.style.transform=''; });
+  }
+
+  // mode explainer
+  const panel = $('#modePanel');
+  const data = {
+    auto:{title:'Auto',tag:'reads the window',ram:58,throttle:'3 throttled',clean:'armed at 75%',fg:'protected',vendor:'adapts to device',note:'Auto switches when a fullscreen game or a streaming app takes focus. You can pin a mode at any time.'},
+    gaming:{title:'Gaming',tag:'fullscreen game',ram:64,throttle:'9 throttled',clean:'capped at 85%',fg:'high GPU + priority',vendor:'Turbo · Optimized',note:'Launchers, chat and browsers go to Efficiency mode. The game is never trimmed; its GPU preference is raised safely.'},
+    streaming:{title:'Streaming',tag:'encoder detected',ram:61,throttle:'7 throttled',clean:'capped at 85%',fg:'encoder protected',vendor:'Keep encode on GPU',note:'The encoder and the game are protected together. Everything else yields until memory pressure drops.'},
+    work:{title:'Work',tag:'desktop apps',ram:52,throttle:'4 throttled',clean:'armed at 75%',fg:'browser responsive',vendor:'Balanced profile',note:'Only clearly idle apps are throttled, so browser tabs and office documents stay snappy.'},
+    eco:{title:'Eco',tag:'battery first',ram:44,throttle:'14 throttled',clean:'aggressive',fg:'still protected',vendor:'Silent profile',note:'The most aggressive posture. Sampling slows down to save power, and almost every idle app is throttled.'},
+    balanced:{title:'Balanced',tag:'everyday',ram:58,throttle:'4 throttled',clean:'armed at 75%',fg:'protected',vendor:'Balanced profile',note:'Cleanup runs only when memory gets tight. Nothing is closed, ever.'}
+  };
+  function showMode(m){
+    const d=data[m]; if(!d) return;
+    $('#mpTitle').textContent=d.title;
+    $('#mpTag').textContent=d.tag;
+    $('#mpRam').textContent=d.ram+'%';
+    $('#mpBar').style.width=d.ram+'%';
+    $('#mpThrottle').textContent=d.throttle;
+    $('#mpClean').textContent=d.clean;
+    $('#mpFg').textContent=d.fg;
+    $('#mpVendor').textContent=d.vendor;
+    $('#mpNote').textContent=d.note;
+    $$('#modeList .mode').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+    panel.classList.remove('live'); void panel.offsetWidth; panel.classList.add('live');
+  }
+  $$('#modeList .mode').forEach(b=>b.addEventListener('click',()=>showMode(b.dataset.mode)));
+
+  // card spotlight
+  $$('.card').forEach(c=>{
+    c.addEventListener('mousemove',e=>{
+      const r=c.getBoundingClientRect();
+      c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+      c.style.setProperty('--my',(e.clientY-r.top)+'px');
+    });
+  });
+
+  // typing
+  const sum = $('#typeSum');
+  const text = 'Memory is moderate at 9.4 of 15.3 GB with low CPU load. Brave is the largest consumer; the ASUS TUF profile is already active.';
+  if(reduce){ sum.textContent=text; }
+  else{
+    let i=0;
+    (function type(){
+      if(i<=text.length){ sum.textContent=text.slice(0,i); i++; setTimeout(type,26); }
+      else { sum.classList.add('done'); }
+    })();
+  }
+
+  // accordion
+  $$('.q').forEach(q=>q.addEventListener('click',()=>{
+    $$('.q').forEach(o=>{ if(o!==q) o.classList.remove('open'); });
+    q.classList.toggle('open');
+  }));
+
+  // copy hash
+  $('#copyHash').addEventListener('click', async ()=>{
+    const btn=$('#copyHash');
+    try{ await navigator.clipboard.writeText($('#hash').textContent.trim()); btn.textContent='copied'; }
+    catch{ btn.textContent='select manually'; }
+    setTimeout(()=>btn.textContent='copy',1800);
+  });
+})();
+</script>
+</body>
+</html>
